@@ -6,26 +6,105 @@
     <title>PP的口算训练营</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: white;
             padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 24px;
+        }
+        .author {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
         .question {
-            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        button {
-            margin: 0 5px;
+        .question span {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn-group button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 0 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-group button:hover {
+            background-color: #ddd;
+        }
+        .greater {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .lesser {
+            background-color: #f44336;
+            color: white;
+        }
+        #submit {
+            width: 100%;
+            padding: 15px;
+            background-color: #008CBA;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        #submit:hover {
+            background-color: #005f73;
         }
         #result {
             margin-top: 20px;
-            font-weight: bold;
+            font-size: 20px;
+            text-align: center;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>PP的口算训练营</h1>
-    <div id="quiz"></div>
-    <button id="submit">提交答案</button>
-    <div id="result"></div>
+    <div class="container">
+        <h1>PP的口算训练营</h1>
+        <div class="author">Designed by LemonIce</div>
+        <div id="quiz"></div>
+        <button id="submit">提交答案</button>
+        <div id="result"></div>
+    </div>
 
     <script>
         const quizContainer = document.getElementById('quiz');
@@ -35,6 +114,7 @@
         let questions = [];
         let userAnswers = [];
         let score = 0;
+        let startTime = null;
 
         // 随机生成20道题
         for (let i = 0; i < 20; i++) {
@@ -48,39 +128,54 @@
         questions.forEach((q, index) => {
             const questionDiv = document.createElement('div');
             questionDiv.classList.add('question');
-            questionDiv.innerHTML = `${q.num1} ? ${q.num2}`;
-            
+            questionDiv.innerHTML = `<span>${q.num1}</span>?<span>${q.num2}</span>`;
+
+            const btnGroup = document.createElement('div');
+            btnGroup.classList.add('btn-group');
+
             const greaterButton = document.createElement('button');
             greaterButton.innerText = '>';
-            greaterButton.onclick = () => recordAnswer(index, '>');
-            
+            greaterButton.classList.add('greater');
+            greaterButton.onclick = () => handleAnswer(index, '>');
+
             const lesserButton = document.createElement('button');
             lesserButton.innerText = '<';
-            lesserButton.onclick = () => recordAnswer(index, '<');
+            lesserButton.classList.add('lesser');
+            lesserButton.onclick = () => handleAnswer(index, '<');
 
-            questionDiv.appendChild(greaterButton);
-            questionDiv.appendChild(lesserButton);
+            btnGroup.appendChild(greaterButton);
+            btnGroup.appendChild(lesserButton);
+            questionDiv.appendChild(btnGroup);
             quizContainer.appendChild(questionDiv);
         });
 
-        let startTime = new Date();
+        // 处理用户选择并震动反馈
+        function handleAnswer(index, answer) {
+            // 第一次点击时开始计时
+            if (startTime === null) {
+                startTime = new Date();
+            }
 
-        // 记录用户答案
-        function recordAnswer(index, answer) {
             userAnswers[index] = answer;
+
+            // 手机震动反馈
+            if (navigator.vibrate) {
+                navigator.vibrate(100); // 振动100毫秒
+            }
         }
 
         // 提交答案并计算得分
         submitButton.onclick = function() {
+            let endTime = new Date();
+            let timeTaken = (endTime - startTime) / 1000; // 转为秒并保留三位小数
+
             questions.forEach((q, index) => {
                 if (userAnswers[index] === q.correctAnswer) {
                     score++;
                 }
             });
 
-            const endTime = new Date();
-            const timeTaken = Math.round((endTime - startTime) / 1000);
-            resultContainer.innerHTML = `得分: ${score}/20 <br> 用时: ${timeTaken} 秒`;
+            resultContainer.innerHTML = `得分: ${score}/20 <br> 用时: ${timeTaken.toFixed(3)} 秒`;
         };
     </script>
 </body>
