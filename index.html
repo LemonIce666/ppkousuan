@@ -74,6 +74,9 @@
             background-color: #f44336;
             color: white;
         }
+        .clicked {
+            background-color: #ffd700; /* 点击后按钮颜色变化 */
+        }
         #submit {
             width: 100%;
             padding: 15px;
@@ -116,10 +119,16 @@
         let score = 0;
         let startTime = null;
 
-        // 随机生成20道题
-        for (let i = 0; i < 20; i++) {
-            const num1 = Math.floor(Math.random() * 100);
-            const num2 = Math.floor(Math.random() * 100);
+        // 随机生成20道题且不生成相同的数字
+        for (let i = 0; i < 10; i++) {
+            let num1 = Math.floor(Math.random() * 100);
+            let num2 = Math.floor(Math.random() * 100);
+
+            // 如果两数相等则重新生成
+            while (num1 === num2) {
+                num2 = Math.floor(Math.random() * 100);
+            }
+
             const correctAnswer = num1 > num2 ? '>' : '<';
             questions.push({ num1, num2, correctAnswer });
         }
@@ -136,12 +145,12 @@
             const greaterButton = document.createElement('button');
             greaterButton.innerText = '>';
             greaterButton.classList.add('greater');
-            greaterButton.onclick = () => handleAnswer(index, '>');
+            greaterButton.onclick = () => handleAnswer(index, '>', greaterButton, lesserButton);
 
             const lesserButton = document.createElement('button');
             lesserButton.innerText = '<';
             lesserButton.classList.add('lesser');
-            lesserButton.onclick = () => handleAnswer(index, '<');
+            lesserButton.onclick = () => handleAnswer(index, '<', greaterButton, lesserButton);
 
             btnGroup.appendChild(greaterButton);
             btnGroup.appendChild(lesserButton);
@@ -149,14 +158,23 @@
             quizContainer.appendChild(questionDiv);
         });
 
-        // 处理用户选择并震动反馈
-        function handleAnswer(index, answer) {
+        // 处理用户选择并震动反馈和视觉反馈
+        function handleAnswer(index, answer, greaterButton, lesserButton) {
             // 第一次点击时开始计时
             if (startTime === null) {
                 startTime = new Date();
             }
 
             userAnswers[index] = answer;
+
+            // 按钮图形化反馈：将被点击的按钮标记
+            if (answer === '>') {
+                greaterButton.classList.add('clicked');
+                lesserButton.classList.remove('clicked');
+            } else {
+                lesserButton.classList.add('clicked');
+                greaterButton.classList.remove('clicked');
+            }
 
             // 手机震动反馈
             if (navigator.vibrate) {
@@ -180,3 +198,4 @@
     </script>
 </body>
 </html>
+
